@@ -1,0 +1,17 @@
+<title>{% block title %}{% endblock %}</title>
+
+{% block header %}
+<div>
+    <div><a href="{% url 'main' %}">Main</a></div><br/>
+    {% if request.user.is_authenticated %}
+    Hello, <a href="{% url 'profile' %}">{{ request.user.username }}</a><br/>
+    <a href="{% url 'logout' %}">logout</a>
+    {% else %}
+    <a href="{% url 'signup' %}">signup</a>
+    <a href="{% url 'login' %}">login</a>
+    {% endif %}
+</div>
+
+{% endblock %}
+{% block content %}
+{% endblock %}

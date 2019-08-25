@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %} Profile {% endblock %}
+
+{% block content %}
+
+<h1>Profile</h1>
+{% with user=request.user %}
+  <h3>{{ user.username }}</h3>
+
+  <h4>Resumes</h4>
+  <ul>{% for resume in user.resume_set.all %}
+    <li><i>{{ resume.text }}</i></li>
+    <table style="border: 1px; border-style: solid">
+      <thead><tr>
+        <th>Vacancy</th>
+        <th>Confirmed by employer</th>
+        <th>Confirmed by you</th>
+      </tr></thead>
+      <tbody>
+      {% for application in resume.application_set.all %}
+      <tr>
+        <td>{{ application.vacancy.text }}</td>
+        <td>{% if application.confirmed_by_employer %} Yes {% else %} No {% endif %}</td>
+        <td>{% if application.confirmed_by_candidate %} Yes
+          {% else %}
+          <form action="{% url 'apply_vacancy' pk=application.vacancy.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="resume_id" value="{{ resume.id }}">
+            <input type="hidden" name="next" value="{% url 'profile' %}">
+            <button type="submit">Apply</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td>No responses yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}</ul>
+
+  <h4>Vacancies</h4>
+  <ul>{% for vacancy in user.vacancy_set.all %}
+    <li><i>{{ vacancy.text }}</i></li>
+    <table style="border: 1px; border-style: solid">
+      <thead><tr>
+        <th>Resume</th>
+        <th>Confirmed by you</th>
+        <th>Confirmed by candidate</th>
+      </tr></thead>
+      <tbody>
+      {% for application in vacancy.application_set.all %}
+      <tr>
+        <td>{{ application.resume.text }}</td>
+        <td>{% if application.confirmed_by_employer %} Yes
+          {% else %}
+          <form action="{% url 'apply_resume' pk=application.resume.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="vacancy_id" value="{{ vacancy.id }}">
+            <input type="hidden" name="next" value="{% url 'profile' %}">
+            <button type="submit">Apply</button>
+          </form>
+          {% endif %}
+        </td>
+        <td>{% if application.confirmed_by_candidate %} Yes {% else %} No {% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td>No responses yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}</ul>
+{% endwith %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Add new resume</th>
+      <th>Add new vacancy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <form action="{% url 'resume_list' %}" method="post">
+          {% csrf_token %}
+          <input type="textarea" name="text">
+          <button type="submit">Add</button>
+        </form>
+      </td>
+      <td>
+        <form action="{% url 'vacancy_list' %}" method="post">
+          {% csrf_token %}
+          <input type="textarea" name="text">
+          <button type="submit">Add</button>
+        </form>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

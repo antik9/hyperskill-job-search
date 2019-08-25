@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %} Resume List {% endblock %}
+
+{% block content %}
+<h1>Resumes</h1>
+<ul>
+{% for resume in object_list %}
+<li> {{ resume.author.username }} <br/> {{ resume.text }} <br/>
+    {% with user=request.user %}
+    {% if user.is_authenticated %}
+        {% if user.vacancy_set.count > 0 %}
+        <form action="{% url 'apply_resume' pk=resume.id %}" method="post">
+            {% csrf_token %}
+            <select name="vacancy_id">
+                {% for vacancy in user.vacancy_set.all %}
+                <option value="{{ vacancy.id }}">{{ vacancy.text }}</option>
+                {% endfor %}
+            </select>
+            <input type="hidden" next="{% url 'resume_list' %}">
+            <button type="submit">Apply</button>
+        </form>
+        {% else %} No vacancy to apply
+        {% endif %}
+    {% else %}
+        Please authenticate to apply
+    {% endif %}
+    {% endwith %}<br/>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
